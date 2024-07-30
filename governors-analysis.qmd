@@ -1,0 +1,27 @@
+---
+title: "A"
+format: html
+execute:
+  echo: false
+---
+
+```{r,warning=FALSE}
+#| label: setup
+#| message: false
+library(primer.data)
+library(tidyverse)
+```
+
+Preceptor Table: unit=cadidates for maor, outcomes=how long they lived, covariates=sex.
+
+Validity: Can be assumed
+
+```{r}
+governors |>
+  filter(state == "Massachusetts") |>
+    select(state, lived_after, sex) |>
+      ggplot(aes(x = lived_after)) +
+      geom_density(aes(color = sex)) +
+      scale_x_continuous(limits = c(0, 60))
+```
+
