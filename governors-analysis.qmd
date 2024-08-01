@@ -5,23 +5,38 @@ execute:
   echo: false
 ---
 
+Preceptor would live longer if he won the election as a republican.
+
 ```{r,warning=FALSE}
 #| label: setup
 #| message: false
-library(primer.data)
 library(tidyverse)
+library(primer.data)
+library(brms)
+library(tidybayes)
+library(gtsummary)
+
+x <- governors |> 
+  select(death_age, election_age, win_margin, party, sex,lived_after) |> 
+  mutate(treatment = ifelse(win_margin > 0, "win", "lose")) |> 
+  filter(abs(win_margin) < 5)|>
+  drop_na()
+
+formula <- bf(death_age ~ treatment + party + win_margin)
 ```
-
-Preceptor Table: unit=cadidates for maor, outcomes=how long they lived, covariates=sex.
-
-Validity: Can be assumed
 
 ```{r}
-governors |>
-  filter(state == "Massachusetts") |>
-    select(state, lived_after, sex) |>
-      ggplot(aes(x = lived_after)) +
-      geom_density(aes(color = sex)) +
-      scale_x_continuous(limits = c(0, 60))
+#| cache: true
+gov_fit<-brm(formula=formula,data=x, family = gaussian(),refresh=0,silent=2, seed=9)
 ```
 
+```{r}
+fixef(gov_fit)
+pp_check(gov_fit)
+tbl_regression(gov_fit,intercept=TRUE)
+```
+
+$$
+\text{death age} = \beta_{0} + \beta_{1} \text{treatment} + \beta_{2} \text{party} + \beta_{3} \text{winmargin} +\epsilon_{i}
+
+$$
